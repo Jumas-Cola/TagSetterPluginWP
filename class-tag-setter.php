@@ -5,7 +5,7 @@
 class TagSetter_class{
     public function __construct(){
         #add_action(wp_head,array($this,'main'));
-        add_action(admin_menu, array($this,'menu'));
+        add_action('admin_menu', array($this,'menu'));
     }
 
     public function menu(){
@@ -41,7 +41,7 @@ class TagSetter_class{
         echo '<form action="options-general.php?page=button-slug" method="post">';
 
 
-        echo '<h3>Skus</h3>';
+        echo '<h3>Skus (max 50)</h3>';
         echo '<textarea id="skus" name="skus" rows="5" cols="33"></textarea>';
         
         echo '<h3>Tags</h3>';
@@ -62,36 +62,42 @@ class TagSetter_class{
         echo '<div id="message" class="updated fade"><p>'
             .'Start.' . '</p></div>';
 
-        $skus = explode(',', $_POST['skus']);
+        if ( !empty($_POST['skus']) and !empty($_POST['tags']) )
+        {
+            $skus = explode(',', $_POST['skus']);
 
-        $tags_array = explode(',', $_POST['tags']);
+            $tags_array = explode(',', $_POST['tags']);
 
-        foreach ($skus as $sku) {
-
-            $sku = trim($sku);
-
-            $post_id = wc_get_product_id_by_sku($sku);
-
-            $terms =  get_the_terms( $post_id, 'product_tag' );
-            if ( ! empty( $terms ) && ! is_wp_error( $terms ) ){
-                foreach ( $terms as $term ) {
-                    $tags_array[] = $term->name;
-                }
-            }
-
-            $tags = array_unique($tags_array);
-
-            if (isset($tags))
+            if ( !empty($skus) and !empty($tags_array) )
             {
-                foreach ( $tags as $tag ) {
-                    $tag = trim(str_replace(' ', '_', $tag));
+                foreach ($skus as $sku) {
+
+                    $sku = trim($sku);
+
+                    $post_id = wc_get_product_id_by_sku($sku);
+
+                    $terms =  get_the_terms( $post_id, 'product_tag' );
+                    if ( ! empty( $terms ) && ! is_wp_error( $terms ) ){
+                        foreach ( $terms as $term ) {
+                            $tags_array[] = $term->name;
+                        }
+                    }
+
+                    $tags = array_unique($tags_array);
+
+                    if (isset($tags))
+                    {
+                        foreach ( $tags as $tag ) {
+                            $tag = trim(str_replace(' ', '_', $tag));
+                        }
+                        wp_set_object_terms( $post_id, $tags, 'product_tag' );
+                    }
+
+                    $product_data = ['ID' => $post_id];
+
+                    wp_update_post($product_data);
                 }
-                wp_set_object_terms( $post_id, $tags, 'product_tag' );
             }
-
-            $product_data = ['ID' => $post_id];
-
-            wp_update_post($product_data);
         }
 
         echo '<div id="message" class="updated fade"><p>'
