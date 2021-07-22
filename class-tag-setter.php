@@ -66,7 +66,7 @@ class TagSetter_class{
         {
             $skus = explode(',', $_POST['skus']);
 
-            $tags_array = explode(',', $_POST['tags']);
+            $new_tags = explode(',', $_POST['tags']);
 
             if ( !empty($skus) and !empty($tags_array) )
             {
@@ -83,9 +83,10 @@ class TagSetter_class{
                         }
                     }
 
-                    $tags = array_unique($tags_array);
+                    // Слияние тегов текущего товара и новых тегов
+                    $tags = array_unique(array_merge($tags_array, $new_tags));
 
-                    if (isset($tags))
+                    if ( isset($tags) )
                     {
                         foreach ( $tags as $tag ) {
                             $tag = trim(str_replace(' ', '_', $tag));
