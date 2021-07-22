@@ -68,13 +68,15 @@ class TagSetter_class{
 
             $new_tags = explode(',', $_POST['tags']);
 
-            if ( !empty($skus) and !empty($tags_array) )
+            if ( !empty($skus) and !empty($new_tags) )
             {
                 foreach ($skus as $sku) {
 
                     $sku = trim($sku);
 
                     $post_id = wc_get_product_id_by_sku($sku);
+
+                    $tags_array = [];
 
                     $terms =  get_the_terms( $post_id, 'product_tag' );
                     if ( ! empty( $terms ) && ! is_wp_error( $terms ) ){
